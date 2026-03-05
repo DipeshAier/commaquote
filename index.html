@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CommaQuote — Online Comma Separator</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0e11;
+      --surface: #17171c;
+      --border: #2a2a35;
+      --accent: #b6f542;
+      --accent2: #42d9f5;
+      --text: #e8e8f0;
+      --muted: #6b6b80;
+      --error: #f54242;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* === GRID BACKGROUND === */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(182,245,66,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(182,245,66,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* === HEADER === */
+    header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 2.5rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(14,14,17,0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      color: #0e0e11;
+      font-weight: 800;
+      letter-spacing: -1px;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+    .logo-text span { color: var(--accent); }
+
+    nav { display: flex; gap: 0.25rem; }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+    }
+    nav a:hover, nav a.active { color: var(--accent); background: rgba(182,245,66,0.08); }
+
+    /* === HERO === */
+    .hero {
+      position: relative;
+      z-index: 5;
+      text-align: center;
+      padding: 3.5rem 2rem 2rem;
+    }
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(182,245,66,0.1);
+      border: 1px solid rgba(182,245,66,0.25);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.3rem 0.9rem;
+      border-radius: 100px;
+      margin-bottom: 1.2rem;
+    }
+    .hero-tag::before { content: '●'; font-size: 0.5rem; }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -1.5px;
+      margin-bottom: 0.8rem;
+    }
+    h1 em { font-style: normal; color: var(--accent); }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 1rem;
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* === MAIN TOOL === */
+    .tool-wrap {
+      position: relative;
+      z-index: 5;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem;
+      width: 100%;
+    }
+
+    /* OPTIONS BAR */
+    .options-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: flex-end;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .opt-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      flex: 1;
+      min-width: 160px;
+    }
+    .opt-group label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    input[type="text"], select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.9rem;
+      padding: 0.55rem 0.8rem;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+      appearance: none;
+    }
+    input[type="text"]:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(182,245,66,0.12);
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b80' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.7rem center;
+      padding-right: 2.2rem;
+      cursor: pointer;
+    }
+    select option { background: var(--surface); }
+
+    /* TOGGLE: each-line */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.15rem;
+    }
+    .toggle {
+      width: 38px; height: 22px;
+      background: var(--border);
+      border-radius: 100px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+      border: none;
+    }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 16px; height: 16px;
+      background: var(--text);
+      border-radius: 50%;
+      top: 3px; left: 3px;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .toggle.on { background: var(--accent); }
+    .toggle.on::after { transform: translateX(16px); background: var(--bg); }
+
+    .toggle-label { font-size: 0.8rem; color: var(--muted); font-weight: 600; cursor: pointer; }
+
+    /* TEXTAREA PAIR */
+    .panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+      .panels { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.2s;
+    }
+    .panel:focus-within { border-color: rgba(182,245,66,0.35); }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .panel-actions { display: flex; gap: 0.4rem; }
+
+    .btn-sm {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+    .btn-sm:active { transform: scale(0.96); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--text); background: rgba(255,255,255,0.04); }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #0e0e11;
+    }
+    .btn-accent:hover { background: #c8f760; }
+
+    textarea {
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      padding: 1rem;
+      flex: 1;
+      min-height: 240px;
+      width: 100%;
+    }
+    textarea::placeholder { color: var(--muted); }
+    textarea[readonly] { cursor: default; color: var(--accent2); }
+
+    /* ACTION ROW */
+    .action-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    .btn-main {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.75rem 2rem;
+      border-radius: 10px;
+      cursor: pointer;
+      border: none;
+      background: var(--accent);
+      color: #0e0e11;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(182,245,66,0.2);
+    }
+    .btn-main:hover { background: #c8f760; box-shadow: 0 6px 28px rgba(182,245,66,0.35); transform: translateY(-1px); }
+    .btn-main:active { transform: scale(0.97) translateY(0); }
+
+    .btn-clear {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-clear:hover { color: var(--error); border-color: var(--error); }
+
+    .stat-row {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .stat { text-align: center; }
+    .stat-val { font-size: 1.25rem; font-weight: 800; color: var(--accent); }
+    .stat-key { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 700; }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.82rem;
+      padding: 0.6rem 1.4rem;
+      border-radius: 100px;
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 9999;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* FOOTER */
+    footer {
+      position: relative; z-index: 5;
+      text-align: center;
+      padding: 1.5rem;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-family: 'DM Mono', monospace;
+    }
+    footer a { color: var(--muted); text-decoration: underline; }
+    footer a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="#" class="logo">
+      <div class="logo-icon">,</div>
+      <span class="logo-text">Comma<span>Quote</span></span>
+    </a>
+    <nav>
+      <a href="#" class="active">Home</a>
+      <a href="#about">About</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-tag">Free Online Tool</div>
+    <h1>The <em>Comma</em> Separator</h1>
+    <p>Paste your list. Choose your separator and quote style. Copy clean output in seconds.</p>
+  </section>
+
+  <main class="tool-wrap">
+
+    <!-- OPTIONS -->
+    <div class="options-bar">
+      <div class="opt-group">
+        <label>Separator Character</label>
+        <select id="sepSelect">
+          <option value=",">Comma  ( , )</option>
+          <option value=", ">Comma + Space  ( ,  )</option>
+          <option value=";">Semicolon  ( ; )</option>
+          <option value="|">Pipe  ( | )</option>
+          <option value=" ">Space</option>
+          <option value="	">Tab</option>
+          <option value="custom">Custom…</option>
+        </select>
+      </div>
+
+      <div class="opt-group" id="customWrap" style="display:none;">
+        <label>Custom Separator</label>
+        <input type="text" id="customSep" placeholder="e.g.  →  or  ::"/>
+      </div>
+
+      <div class="opt-group">
+        <label>Quote Style</label>
+        <select id="quoteSelect">
+          <option value="">None</option>
+          <option value="'">Single Quote  ( ' )</option>
+          <option value='"'>Double Quote  ( " )</option>
+          <option value="`">Backtick  ( ` )</option>
+        </select>
+      </div>
+
+      <div class="opt-group">
+        <label>Each Item</label>
+        <div class="toggle-row">
+          <button class="toggle" id="trimToggle" onclick="toggleOpt('trim')"></button>
+          <span class="toggle-label">Trim whitespace</span>
+        </div>
+        <div class="toggle-row" style="margin-top:0.4rem;">
+          <button class="toggle" id="skipEmptyToggle" onclick="toggleOpt('skipEmpty')"></button>
+          <span class="toggle-label">Skip empty lines</span>
+        </div>
+      </div>
+
+      <div class="opt-group">
+        <label>Output Wrap</label>
+        <select id="wrapSelect">
+          <option value="">None</option>
+          <option value="()">Parentheses  ( … )</option>
+          <option value="[]">Square Brackets  [ … ]</option>
+          <option value="{}">Curly Braces  { … }</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- PANELS -->
+    <div class="panels">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Input</span>
+          <div class="panel-actions">
+            <button class="btn-sm btn-ghost" onclick="pasteClipboard()">Paste</button>
+            <button class="btn-sm btn-ghost" onclick="clearInput()">Clear</button>
+          </div>
+        </div>
+        <textarea id="inputArea" placeholder="Type or paste your list here — one item per line…" oninput="liveConvert()"></textarea>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Output</span>
+          <div class="panel-actions">
+            <button class="btn-sm btn-accent" onclick="copyOutput()">Copy</button>
+          </div>
+        </div>
+        <textarea id="outputArea" readonly placeholder="Your formatted output will appear here…"></textarea>
+      </div>
+    </div>
+
+    <!-- ACTION ROW -->
+    <div class="action-row">
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-val" id="statItems">0</div>
+          <div class="stat-key">Items</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" id="statChars">0</div>
+          <div class="stat-key">Output Chars</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:0.75rem;">
+        <button class="btn-clear" onclick="clearAll()">Clear All</button>
+        <button class="btn-main" onclick="convert()">Convert →</button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ABOUT / FAQ -->
+  <section id="about" style="position:relative;z-index:5;max-width:760px;margin:0 auto;padding:2rem 2rem 1rem;">
+    <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:0.6rem;letter-spacing:-0.5px;">About</h2>
+    <p style="color:var(--muted);font-size:0.9rem;line-height:1.8;font-family:'DM Mono',monospace;">
+      CommaQuote is a free, zero-install tool to turn multi-line lists into comma-separated (or any-separator) strings. Paste your data, pick your format, hit Convert, and you're done. No ads, no tracking, no accounts.
+    </p>
+  </section>
+
+  <section id="faq" style="position:relative;z-index:5;max-width:760px;margin:0 auto;padding:1rem 2rem 3rem;">
+    <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:1rem;letter-spacing:-0.5px;">FAQ</h2>
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <details style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;">
+        <summary style="cursor:pointer;font-weight:700;font-size:0.9rem;">What separators can I use?</summary>
+        <p style="margin-top:0.6rem;color:var(--muted);font-size:0.85rem;line-height:1.7;font-family:'DM Mono',monospace;">Comma, comma+space, semicolon, pipe, space, tab, or any custom string you type in.</p>
+      </details>
+      <details style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;">
+        <summary style="cursor:pointer;font-weight:700;font-size:0.9rem;">Does this work offline?</summary>
+        <p style="margin-top:0.6rem;color:var(--muted);font-size:0.85rem;line-height:1.7;font-family:'DM Mono',monospace;">Yes — once loaded, the entire tool runs in your browser. No data is sent anywhere.</p>
+      </details>
+      <details style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;">
+        <summary style="cursor:pointer;font-weight:700;font-size:0.9rem;">What's the wrap option?</summary>
+        <p style="margin-top:0.6rem;color:var(--muted);font-size:0.85rem;line-height:1.7;font-family:'DM Mono',monospace;">Wrap wraps the entire output in parentheses, square brackets, or curly braces — handy for SQL IN clauses or JSON arrays.</p>
+      </details>
+    </div>
+  </section>
+
+  <footer>
+    © 2026 CommaQuote &nbsp;·&nbsp; <a href="#faq">Disclaimer</a> &nbsp;·&nbsp; All processing happens locally in your browser.
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const opts = { trim: true, skipEmpty: true };
+
+    // Init toggles
+    document.getElementById('trimToggle').classList.add('on');
+    document.getElementById('skipEmptyToggle').classList.add('on');
+
+    function toggleOpt(key) {
+      opts[key] = !opts[key];
+      document.getElementById(key + 'Toggle').classList.toggle('on', opts[key]);
+      liveConvert();
+    }
+
+    document.getElementById('sepSelect').addEventListener('change', function() {
+      document.getElementById('customWrap').style.display = this.value === 'custom' ? 'flex' : 'none';
+      liveConvert();
+    });
+    document.getElementById('customSep').addEventListener('input', liveConvert);
+    document.getElementById('quoteSelect').addEventListener('change', liveConvert);
+    document.getElementById('wrapSelect').addEventListener('change', liveConvert);
+
+    function getSeparator() {
+      const sel = document.getElementById('sepSelect').value;
+      if (sel === 'custom') return document.getElementById('customSep').value;
+      return sel;
+    }
+
+    function convert() {
+      const raw = document.getElementById('inputArea').value;
+      let lines = raw.split('\n');
+      if (opts.trim) lines = lines.map(l => l.trim());
+      if (opts.skipEmpty) lines = lines.filter(l => l.length > 0);
+
+      const quote = document.getElementById('quoteSelect').value;
+      const sep = getSeparator();
+      const wrap = document.getElementById('wrapSelect').value;
+
+      const items = lines.map(l => quote ? quote + l + quote : l);
+      let out = items.join(sep);
+
+      if (wrap) {
+        const [open, close] = wrap === '()' ? ['(', ')'] : wrap === '[]' ? ['[', ']'] : ['{', '}'];
+        out = open + out + close;
+      }
+
+      document.getElementById('outputArea').value = out;
+      document.getElementById('statItems').textContent = lines.length;
+      document.getElementById('statChars').textContent = out.length;
+    }
+
+    function liveConvert() { convert(); }
+
+    function clearInput() {
+      document.getElementById('inputArea').value = '';
+      liveConvert();
+    }
+
+    function clearAll() {
+      document.getElementById('inputArea').value = '';
+      document.getElementById('outputArea').value = '';
+      document.getElementById('statItems').textContent = '0';
+      document.getElementById('statChars').textContent = '0';
+    }
+
+    async function pasteClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById('inputArea').value = text;
+        liveConvert();
+        showToast('Pasted from clipboard!');
+      } catch {
+        showToast('Clipboard access denied — paste manually.');
+      }
+    }
+
+    function copyOutput() {
+      const out = document.getElementById('outputArea').value;
+      if (!out) { showToast('Nothing to copy yet!'); return; }
+      navigator.clipboard.writeText(out).then(() => {
+        showToast('Copied to clipboard ✓');
+      }).catch(() => {
+        document.getElementById('outputArea').select();
+        document.execCommand('copy');
+        showToast('Copied ✓');
+      });
+    }
+
+    let toastTimer;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+    }
+  </script>
+</body>
+</html>
